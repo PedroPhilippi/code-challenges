@@ -1,0 +1,30 @@
+version: 1
+default_environment: dev
+project_id: 6833c308-8518-4c81-a4bd-a815eb538d6b
+environments:
+- name: dev
+- name: staging
+- name: prod
+
+plugins:
+  extractors:
+  - name: tap-postgres
+    variant: meltanolabs
+    pip_url: git+https://github.com/MeltanoLabs/tap-postgres.git
+  - name: tap-postgres-orders
+    inherit_from: tap-postgres
+    config:
+      database: northwind
+      host: source_db
+      port: 5433
+      password: 11223344556677
+      user: northwind_user  
+    select:
+      - public-orders.*
+
+  loaders:
+  - name: target-jsonl
+    variant: andyh1203
+    pip_url: target-jsonl
+    destination_path: /data/postgres/orders/{{MELTANO_EXTRACT_DATE}}/file.json
+    custom_name: target-jsonl-orders
